@@ -41,14 +41,9 @@ var buildFS embed.FS
 //go:embed web/default/dist/index.html
 var indexPage []byte
 
-//go:embed web/classic/dist
-var classicBuildFS embed.FS
-
-//go:embed web/classic/dist/index.html
-var classicIndexPage []byte
-
 func main() {
 	startTime := time.Now()
+	basePath := normalizeBasePath(os.Getenv("BASE_PATH"))
 
 	err := InitResources()
 	if err != nil {
@@ -177,8 +172,12 @@ func main() {
 	middleware.SetUpLogger(server)
 	// Initialize session store
 	store := cookie.NewStore([]byte(common.SessionSecret))
+	sessionPath := "/"
+	if basePath != "" {
+		sessionPath = basePath
+	}
 	store.Options(sessions.Options{
-		Path:     "/",
+		Path:     sessionPath,
 		MaxAge:   2592000, // 30 days
 		HttpOnly: true,
 		Secure:   false,
@@ -193,8 +192,6 @@ func main() {
 	router.SetRouter(server, router.ThemeAssets{
 		DefaultBuildFS:   buildFS,
 		DefaultIndexPage: indexPage,
-		ClassicBuildFS:   classicBuildFS,
-		ClassicIndexPage: classicIndexPage,
 	})
 	var port = os.Getenv("PORT")
 	if port == "" {
@@ -204,10 +201,46 @@ func main() {
 	// Log startup success message
 	common.LogStartupSuccess(startTime, port)
 
-	err = server.Run(":" + port)
+	if basePath != "" {
+		err = http.ListenAndServe(":"+port, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, basePath) {
+				trimmedPath := strings.TrimPrefix(r.URL.Path, basePath)
+				if trimmedPath == "" {
+					trimmedPath = "/"
+				}
+				r.URL.Path = trimmedPath
+				if r.URL.RawPath != "" {
+					trimmedRawPath := strings.TrimPrefix(r.URL.RawPath, basePath)
+					if trimmedRawPath == "" {
+						trimmedRawPath = "/"
+					}
+					r.URL.RawPath = trimmedRawPath
+				}
+				r.RequestURI = r.URL.RequestURI()
+			}
+			server.ServeHTTP(w, r)
+		}))
+	} else {
+		err = server.Run(":" + port)
+	}
 	if err != nil {
 		common.FatalLog("failed to start HTTP server: " + err.Error())
 	}
+}
+
+func normalizeBasePath(value string) string {
+	basePath := strings.TrimSpace(value)
+	if basePath == "" || basePath == "/" {
+		return ""
+	}
+	if !strings.HasPrefix(basePath, "/") {
+		basePath = "/" + basePath
+	}
+	basePath = strings.TrimRight(basePath, "/")
+	if basePath == "/" {
+		return ""
+	}
+	return basePath
 }
 
 func InjectUmamiAnalytics() {
@@ -228,7 +261,6 @@ func InjectUmamiAnalytics() {
 	analyticsInject := []byte(analyticsInjectBuilder.String())
 	placeholder := []byte("<!--umami-->\n")
 	indexPage = bytes.ReplaceAll(indexPage, placeholder, analyticsInject)
-	classicIndexPage = bytes.ReplaceAll(classicIndexPage, placeholder, analyticsInject)
 }
 
 func InjectGoogleAnalytics() {
@@ -252,7 +284,6 @@ func InjectGoogleAnalytics() {
 	analyticsInject := []byte(analyticsInjectBuilder.String())
 	placeholder := []byte("<!--Google Analytics-->\n")
 	indexPage = bytes.ReplaceAll(indexPage, placeholder, analyticsInject)
-	classicIndexPage = bytes.ReplaceAll(classicIndexPage, placeholder, analyticsInject)
 }
 
 func InitResources() error {

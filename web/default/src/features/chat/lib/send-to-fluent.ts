@@ -1,3 +1,5 @@
+import { getOriginWithBasePath } from '@/lib/base-path'
+
 export function sendToFluent(apiKey: string, serverAddress?: string): boolean {
   if (typeof window === 'undefined') {
     return false
@@ -10,7 +12,7 @@ export function sendToFluent(apiKey: string, serverAddress?: string): boolean {
 
   const payload = {
     id: 'new-api',
-    baseUrl: serverAddress || window.location.origin,
+    baseUrl: serverAddress || getOriginWithBasePath(),
     apiKey: `sk-${apiKey}`,
   }
 

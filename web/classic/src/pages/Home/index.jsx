@@ -40,6 +40,7 @@ import {
 } from '@douyinfe/semi-icons';
 import { Link } from 'react-router-dom';
 import NoticeModal from '../../components/layout/NoticeModal';
+import { getOriginWithBasePath } from '../../helpers/base-path';
 import {
   Moonshot,
   OpenAI,
@@ -76,7 +77,7 @@ const Home = () => {
   const isDemoSiteMode = statusState?.status?.demo_site_enabled || false;
   const docsLink = statusState?.status?.docs_link || '';
   const serverAddress =
-    statusState?.status?.server_address || `${window.location.origin}`;
+    statusState?.status?.server_address || getOriginWithBasePath();
   const endpointItems = API_ENDPOINTS.map((e) => ({ value: e }));
   const [endpointIndex, setEndpointIndex] = useState(0);
   const isChinese = i18n.language.startsWith('zh');

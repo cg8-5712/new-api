@@ -66,6 +66,7 @@ import LinuxDoIcon from '../common/logo/LinuxDoIcon';
 import TwoFAVerification from './TwoFAVerification';
 import { useTranslation } from 'react-i18next';
 import { SiDiscord } from 'react-icons/si';
+import { withBasePath } from '../../helpers/base-path';
 
 const LoginForm = () => {
   let navigate = useNavigate();
@@ -669,7 +670,7 @@ const LoginForm = () => {
                       {hasUserAgreement && (
                         <>
                           <a
-                            href='/user-agreement'
+                            href={withBasePath('/user-agreement')}
                             target='_blank'
                             rel='noopener noreferrer'
                             className='text-blue-600 hover:text-blue-800 mx-1'
@@ -682,7 +683,7 @@ const LoginForm = () => {
                       {hasPrivacyPolicy && (
                         <>
                           <a
-                            href='/privacy-policy'
+                            href={withBasePath('/privacy-policy')}
                             target='_blank'
                             rel='noopener noreferrer'
                             className='text-blue-600 hover:text-blue-800 mx-1'
@@ -775,7 +776,7 @@ const LoginForm = () => {
                         {hasUserAgreement && (
                           <>
                             <a
-                              href='/user-agreement'
+                              href={withBasePath('/user-agreement')}
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'
@@ -788,7 +789,7 @@ const LoginForm = () => {
                         {hasPrivacyPolicy && (
                           <>
                             <a
-                              href='/privacy-policy'
+                              href={withBasePath('/privacy-policy')}
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'

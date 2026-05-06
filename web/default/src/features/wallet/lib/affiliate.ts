@@ -1,3 +1,5 @@
+import { getOriginWithBasePath } from '@/lib/base-path'
+
 // ============================================================================
 // Affiliate Functions
 // ============================================================================
@@ -7,5 +9,5 @@
  */
 export function generateAffiliateLink(affCode: string): string {
   if (typeof window === 'undefined') return ''
-  return `${window.location.origin}/register?aff=${affCode}`
+  return `${getOriginWithBasePath()}/register?aff=${affCode}`
 }

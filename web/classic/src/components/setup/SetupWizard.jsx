@@ -27,6 +27,7 @@ import DatabaseStep from './components/steps/DatabaseStep';
 import AdminStep from './components/steps/AdminStep';
 import UsageModeStep from './components/steps/UsageModeStep';
 import CompleteStep from './components/steps/CompleteStep';
+import { withBasePath } from '../../helpers/base-path';
 
 const SetupWizard = () => {
   const { t } = useTranslation();
@@ -86,7 +87,7 @@ const SetupWizard = () => {
 
         // If setup is already completed, redirect to home
         if (data.status) {
-          window.location.href = '/';
+          window.location.href = withBasePath('/');
           return;
         }
 

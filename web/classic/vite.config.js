@@ -23,9 +23,11 @@ import pkg from '@douyinfe/vite-plugin-semi';
 import path from 'path';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 const { vitePluginSemi } = pkg;
+const basePath = process.env.VITE_BASE_PATH || '/';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: basePath,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

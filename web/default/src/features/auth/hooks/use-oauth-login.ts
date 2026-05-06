@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { AxiosRequestConfig } from 'axios'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { getOriginWithBasePath } from '@/lib/base-path'
 import { useAuthStore } from '@/stores/auth-store'
 import { api } from '@/lib/api'
 import { getOAuthState } from '../api'
@@ -183,7 +184,7 @@ export function useOAuthLogin(status: SystemStatus | null) {
         return
       }
 
-      const redirectUri = `${window.location.origin}/oauth/${provider.slug}`
+      const redirectUri = `${getOriginWithBasePath()}/oauth/${provider.slug}`
       const url = new URL(provider.authorization_endpoint)
       url.searchParams.set('client_id', provider.client_id)
       url.searchParams.set('redirect_uri', redirectUri)

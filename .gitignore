@@ -1,5 +1,6 @@
 .idea
 .vscode
+.codex-cache
 .zed
 .history
 upload

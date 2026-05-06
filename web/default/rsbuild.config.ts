@@ -6,12 +6,28 @@ import { tanstackRouter } from '@tanstack/router-plugin/rspack'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+function normalizeBasePath(value = ''): string {
+  let basePath = String(value).trim()
+  if (!basePath || basePath === '/') {
+    return ''
+  }
+  if (!basePath.startsWith('/')) {
+    basePath = `/${basePath}`
+  }
+  basePath = basePath.replace(/\/+$/, '')
+  return basePath === '/' ? '' : basePath
+}
+
 export default defineConfig(({ envMode }) => {
   const env = loadEnv({ mode: envMode, prefixes: ['VITE_'] })
   const serverUrl =
     process.env.VITE_REACT_APP_SERVER_URL ||
     env.rawPublicVars.VITE_REACT_APP_SERVER_URL ||
     'http://localhost:3000'
+  const basePath = normalizeBasePath(
+    process.env.VITE_BASE_PATH || env.rawPublicVars.VITE_BASE_PATH || ''
+  )
+  const assetPrefix = basePath ? `${basePath}/` : '/'
 
   const isProd = envMode === 'production'
   const devProxy = Object.fromEntries(
@@ -54,6 +70,9 @@ export default defineConfig(({ envMode }) => {
       entry: {
         index: './src/main.tsx',
       },
+      define: {
+        __APP_BASE_PATH__: JSON.stringify(basePath),
+      },
     },
     resolve: {
       alias: {
@@ -68,6 +87,7 @@ export default defineConfig(({ envMode }) => {
       proxy: devProxy,
     },
     output: {
+      assetPrefix,
       // Production optimizations
       minify: isProd,
       target: 'web',

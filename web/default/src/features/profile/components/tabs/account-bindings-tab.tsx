@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { SiGithub, SiWechat, SiLinux } from 'react-icons/si'
 import { toast } from 'sonner'
 import { IconDiscord } from '@/assets/brand-icons'
+import { getOriginWithBasePath, withBasePath } from '@/lib/base-path'
 import {
   handleGitHubOAuth,
   handleOIDCOAuth,
@@ -96,8 +97,8 @@ export function AccountBindingsTab({
   }
 
   const handleBindCustomOAuth = (provider: { id: string; name: string }) => {
-    const redirectUrl = `${window.location.origin}/oauth/${provider.id}?bind=true`
-    window.location.href = `/api/oauth/${provider.id}?redirect=${encodeURIComponent(redirectUrl)}`
+    const redirectUrl = `${getOriginWithBasePath()}/oauth/${provider.id}?bind=true`
+    window.location.href = `${withBasePath(`/api/oauth/${provider.id}`)}?redirect=${encodeURIComponent(redirectUrl)}`
   }
 
   useEffect(() => {
