@@ -545,6 +545,7 @@ export async function getPrefillGroups(
   message?: string
   data?: Array<{ id: number; name: string; items: string | string[] }>
 }> {
-  const res = await api.get('/api/prefill_group', { params: { type } })
+  // Trailing slash required to avoid Gin redirect dropping the sub-path.
+  const res = await api.get('/api/prefill_group/', { params: { type } })
   return res.data
 }
