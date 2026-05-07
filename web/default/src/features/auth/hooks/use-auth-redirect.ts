@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import i18n from 'i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { getSelf } from '@/lib/api'
+import { toAppPath } from '@/lib/base-path'
 import type { User } from '@/features/users/types'
 import { saveUserId } from '../lib/storage'
 
@@ -67,8 +68,7 @@ export function useAuthRedirect() {
       console.error('Failed to fetch user data:', error)
     }
 
-    // Navigate to target page
-    const targetPath = redirectTo || '/dashboard'
+    const targetPath = toAppPath(redirectTo || '/dashboard', '/dashboard')
     navigate({ to: targetPath, replace: true })
   }
 

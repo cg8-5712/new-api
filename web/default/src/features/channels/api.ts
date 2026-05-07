@@ -78,7 +78,8 @@ export type CodexCredentialRefreshResponse = {
 export async function getChannels(
   params: GetChannelsParams = {}
 ): Promise<GetChannelsResponse> {
-  const res = await api.get('/api/channel', { params })
+  // Trailing slash required to avoid 301 redirect losing basePath
+  const res = await api.get('/api/channel/', { params })
   return res.data
 }
 
@@ -107,7 +108,8 @@ export async function getChannel(id: number): Promise<GetChannelResponse> {
 export async function createChannel(
   data: AddChannelRequest
 ): Promise<{ success: boolean; message?: string }> {
-  const res = await api.post('/api/channel', data)
+  // Trailing slash required to avoid 301 redirect losing basePath
+  const res = await api.post('/api/channel/', data)
   return res.data
 }
 

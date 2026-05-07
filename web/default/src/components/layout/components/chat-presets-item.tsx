@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react'
-import { Link, useLocation } from '@tanstack/react-router'
-import { ExternalLink, Loader2, ChevronRight } from 'lucide-react'
+import { useCallback, useMemo } from 'react'
+import { useLocation, useNavigate } from '@tanstack/react-router'
+import { ChevronRight, ExternalLink, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
@@ -29,16 +29,10 @@ import { resolveChatUrl, type ChatPreset } from '@/features/chat/lib/chat-links'
 import { normalizeHref } from '../lib/url-utils'
 import type { NavChatPresets } from '../types'
 
-/**
- * Check if a preset requires an API key
- */
 function requiresApiKey(preset: ChatPreset): boolean {
   return preset.url.includes('{key}') || preset.url.includes('{cherryConfig}')
 }
 
-/**
- * Sub-menu item for a single chat preset
- */
 function ChatMenuItem({
   preset,
   active,
@@ -48,20 +42,14 @@ function ChatMenuItem({
   preset: ChatPreset
   active: boolean
   onOpen: (preset: ChatPreset) => void
-  onNavigate: () => void
+  onNavigate: (preset: ChatPreset) => void
 }) {
   if (preset.type === 'web') {
     return (
       <SidebarMenuSubItem>
         <SidebarMenuSubButton
           isActive={active}
-          render={
-            <Link
-              to='/chat/$chatId'
-              params={{ chatId: preset.id }}
-              onClick={onNavigate}
-            />
-          }
+          onClick={() => onNavigate(preset)}
         >
           <span>{preset.name}</span>
         </SidebarMenuSubButton>
@@ -83,24 +71,17 @@ function ChatMenuItem({
   )
 }
 
-/**
- * Dropdown menu item for a single chat preset
- */
 function DropdownPresetItem({
   preset,
   onOpen,
+  onNavigate,
 }: {
   preset: ChatPreset
   onOpen: (preset: ChatPreset) => void
+  onNavigate: (preset: ChatPreset) => void
 }) {
   if (preset.type === 'web') {
-    return (
-      <DropdownMenuItem
-        render={<Link to='/chat/$chatId' params={{ chatId: preset.id }} />}
-      >
-        {preset.name}
-      </DropdownMenuItem>
-    )
+    return <DropdownMenuItem onClick={() => onNavigate(preset)}>{preset.name}</DropdownMenuItem>
   }
 
   return (
@@ -111,15 +92,13 @@ function DropdownPresetItem({
   )
 }
 
-/**
- * Dynamic chat presets navigation item
- */
 export function ChatPresetsItem({ item }: { item: NavChatPresets }) {
   const { t } = useTranslation()
   const { chatPresets, serverAddress } = useChatPresets()
   const { state, isMobile, setOpenMobile } = useSidebar()
+  const navigate = useNavigate()
   const href = useLocation({ select: (location) => location.href })
-  const loadingMessage = t('Preparing chat keys…')
+  const loadingMessage = t('Preparing chat keys...')
 
   const visiblePresets = useMemo(
     () => chatPresets.filter((preset) => preset.type !== 'fluent'),
@@ -178,14 +157,23 @@ export function ChatPresetsItem({ item }: { item: NavChatPresets }) {
     [activeKey, isKeyPending, keyError, serverAddress, setOpenMobile, t]
   )
 
+  const handleOpenChat = useCallback(
+    (preset: ChatPreset) => {
+      setOpenMobile(false)
+      void navigate({
+        to: '/chat/$chatId',
+        params: { chatId: preset.id },
+      })
+    },
+    [navigate, setOpenMobile]
+  )
+
   const normalizedHref = normalizeHref(href)
 
-  // Don't render if no visible presets
   if (visiblePresets.length === 0) {
     return null
   }
 
-  // Collapsed state on non-mobile - render dropdown menu
   if (state === 'collapsed' && !isMobile) {
     return (
       <SidebarMenuItem>
@@ -203,6 +191,7 @@ export function ChatPresetsItem({ item }: { item: NavChatPresets }) {
                 key={preset.id}
                 preset={preset}
                 onOpen={handleOpenExternal}
+                onNavigate={handleOpenChat}
               />
             ))}
             {hasKeyDependentPresets && <DropdownMenuSeparator />}
@@ -218,7 +207,6 @@ export function ChatPresetsItem({ item }: { item: NavChatPresets }) {
     )
   }
 
-  // Expanded state - render collapsible menu
   return (
     <Collapsible
       defaultOpen={normalizedHref.startsWith('/chat')}
@@ -241,7 +229,7 @@ export function ChatPresetsItem({ item }: { item: NavChatPresets }) {
               preset={preset}
               active={normalizedHref === `/chat/${preset.id}`}
               onOpen={handleOpenExternal}
-              onNavigate={() => setOpenMobile(false)}
+              onNavigate={handleOpenChat}
             />
           ))}
           {hasKeyDependentPresets && isKeyPending && (

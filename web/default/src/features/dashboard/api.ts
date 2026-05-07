@@ -20,7 +20,8 @@ export async function getUserQuotaDates(
   },
   isAdmin = false
 ) {
-  const endpoint = isAdmin ? '/api/data' : '/api/data/self'
+  // Ensure trailing slash to avoid 301 redirect that loses basePath
+  const endpoint = isAdmin ? '/api/data/' : '/api/data/self/'
   const res = await api.get<{ success: boolean; data: QuotaDataItem[] }>(
     endpoint,
     { params }
@@ -37,7 +38,7 @@ export async function getUserQuotaDataByUsers(params: {
   end_timestamp: number
 }) {
   const res = await api.get<{ success: boolean; data: QuotaDataItem[] }>(
-    '/api/data/users',
+    '/api/data/users/',
     { params }
   )
   return res.data

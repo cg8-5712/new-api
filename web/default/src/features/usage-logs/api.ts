@@ -30,7 +30,9 @@ async function fetchLogs<T>(
     ...params,
   })
   const path = buildApiPath(endpoint, isAdmin)
-  const res = await api.get(`${path}?${queryParams}`)
+  // Ensure trailing slash to avoid 301 redirect that loses basePath
+  const pathWithSlash = path.endsWith('/') ? path : `${path}/`
+  const res = await api.get(`${pathWithSlash}?${queryParams}`)
   return res.data
 }
 
@@ -43,7 +45,9 @@ async function fetchLogStats<T>(
     params as unknown as Record<string, unknown>
   )
   const path = buildApiPath(endpoint, isAdmin)
-  const res = await api.get(`${path}/stat?${queryParams}`)
+  // Ensure trailing slash to avoid 301 redirect that loses basePath
+  const pathWithSlash = path.endsWith('/') ? path : `${path}/`
+  const res = await api.get(`${pathWithSlash}stat?${queryParams}`)
   return res.data
 }
 
