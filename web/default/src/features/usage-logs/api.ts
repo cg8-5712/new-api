@@ -14,8 +14,12 @@ import type {
 // Generic API Helpers
 // ============================================================================
 
-function buildApiPath(endpoint: string, isAdmin: boolean): string {
-  return isAdmin ? endpoint : `${endpoint}/self`
+function buildLogsApiPath(endpoint: string, isAdmin: boolean): string {
+  return isAdmin ? `${endpoint}/` : `${endpoint}/self`
+}
+
+function buildStatsApiPath(endpoint: string, isAdmin: boolean): string {
+  return isAdmin ? `${endpoint}/stat` : `${endpoint}/self/stat`
 }
 
 async function fetchLogs<T>(
@@ -29,10 +33,9 @@ async function fetchLogs<T>(
     page_size: paramRecord.page_size || 20,
     ...params,
   })
-  const path = buildApiPath(endpoint, isAdmin)
-  // Ensure trailing slash to avoid 301 redirect that loses basePath
-  const pathWithSlash = path.endsWith('/') ? path : `${path}/`
-  const res = await api.get(`${pathWithSlash}?${queryParams}`)
+  const path = buildLogsApiPath(endpoint, isAdmin)
+  const url = queryParams ? `${path}?${queryParams}` : path
+  const res = await api.get(url)
   return res.data
 }
 
@@ -44,10 +47,9 @@ async function fetchLogStats<T>(
   const queryParams = buildQueryParams(
     params as unknown as Record<string, unknown>
   )
-  const path = buildApiPath(endpoint, isAdmin)
-  // Ensure trailing slash to avoid 301 redirect that loses basePath
-  const pathWithSlash = path.endsWith('/') ? path : `${path}/`
-  const res = await api.get(`${pathWithSlash}stat?${queryParams}`)
+  const path = buildStatsApiPath(endpoint, isAdmin)
+  const url = queryParams ? `${path}?${queryParams}` : path
+  const res = await api.get(url)
   return res.data
 }
 
